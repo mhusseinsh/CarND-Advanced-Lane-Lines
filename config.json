@@ -1,0 +1,61 @@
+{
+    "calibrationPath": "camera_cal",
+    "chessboard": {
+        "columns": "9",
+        "rows": "6"
+    },
+    "colorThreshold": {
+        "channel": "s_channel",
+        "colorspace": "hls",
+        "threshold": {
+            "high": "255",
+            "low": "90"
+        }
+    },
+    "datapath": "test_images",
+    "video": "project_video.mp4",
+    "videoMode": "False",
+    "saveMode": "True",
+    "perspectiveTransform": {
+        "src": {
+            "ul_offset": {
+                "x": "-30",
+                "y": "80"
+            },
+            "ll_offset": {
+                "x": "-420",
+                "y": "0"
+            },
+            "lr_offset": {
+                "x": "550",
+                "y": "0"
+            },
+            "ur_offset": {
+                "x": "60",
+                "y": "80"
+            }
+        }
+    },
+    "threshold": {
+        "dir_thresh": {
+            "high": "pi/2",
+            "low": "0"
+        },
+        "grad_thresh": {
+            "high": "100",
+            "low": "20"
+        },
+        "kernel_size": "3",
+        "mag_thresh": {
+            "high": "170",
+            "low": "30"
+        }
+    },
+    "laneFinding": {
+        "ym_per_pix": "30/720",
+        "xm_per_pix": "3.7/700",
+        "nwindows": "9",
+        "margin": "100",
+        "minpix": "50"
+    }
+}
