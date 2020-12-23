@@ -4,7 +4,7 @@
 
 **Advanced Lane Finding Project**
 
-Lane finding is an important task for an autonomous vehicle to be able to how much exactly is it away from a certain lane. Finding the ego lane as well and making sure that the car is sticking to it is very crucial for self-driving vehicles. Lane detection may be tricky sometimes, especially in the case of changing of light/brightness or different lane colors as well as some road markings may be disappearing. Previously, a [basic lane finding algorithm](https://github.com/mhusseinsh/CarND-LaneLines-P1) using classic approaches of basic [openCV](https://opencv.org/) functions was implemented, and it was very obvious from the results, that it cannot be used for generic cases. The fact is due that it failed in curvy lanes, and different lane colors.
+Lane finding is an important task for an autonomous vehicle to be able to know how much exactly is it away from a certain lane. Finding the ego lane as well as making sure that the car is sticking to it, is very crucial for self-driving vehicles. Lane detection may be tricky sometimes, especially in the case of changing of light/brightness or different lane colors as well as some road markings may be disappearing. Previously, a [basic lane finding algorithm](https://github.com/mhusseinsh/CarND-LaneLines-P1) using classic approaches of basic [openCV](https://opencv.org/) functions was implemented, and it was very obvious from the results, that it cannot be used for generic cases. The fact is due that it failed in curvy lanes, and different lane colors.
 
 The aim of this project was to implement an advanced lane finding algorithm which can be used in most of the cases and can easily find the lanes for different scenarios.
 
@@ -13,7 +13,7 @@ The goals / steps of this project are the following:
 * Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
 * Apply a distortion correction to raw images.
 * Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image ("birds-eye view").
+* Apply a perspective transform to rectify binary image ("bird's-eye view").
 * Detect lane pixels and fit to find the lane boundary.
 * Determine the curvature of the lane and vehicle position with respect to center.
 * Warp the detected lane boundaries back onto the original image.
@@ -125,7 +125,7 @@ for idx, file_name in enumerate(images):
         imgpoints.append(corners)  # Draw and display the corners
         cv2.drawChessboardCorners(img, self.chessboardSize, corners, ret)
 ```
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the [`cv2.calibrateCamera()`](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga3207604e4b1a1758aa66acb6ed5aa65d) function.  I applied this distortion correction to the test image using the [`undistortChessboardImages()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/undistortion.py#L17) function, which will be explained later (just for debugging)
+I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the [`cv2.calibrateCamera()`](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga3207604e4b1a1758aa66acb6ed5aa65d) function.  I applied this distortion correction to the chessboard images using the [`undistortChessboardImages()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/undistortion.py#L17) function, which will be explained later (just for debugging)
 ```python
 # Do camera calibration given object points and image points
 img_size = (img.shape[1], img.shape[0])
@@ -516,7 +516,7 @@ def lineFit(self, binary_warped):
 
     return left_fit, right_fit, out_img, histogram_img, window_fit_img
 ```
-Using the same algorithm of sliding window search for each and every frame may seem to be quite inreasonable and inefficient. If we are working with a camera which provides around a real-time FPS, we can notice that between every consequtive frame, there is no such different in the lane lines, in terms of position or curvature. Accordingly, a [`fineFit()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L273) function is implemented under the same class, which searches for the lanes within a search margin based on the previous saved fit. The idea is that once we use the sliding windows to find the lines fit, the fit is saved. Then for the next frame, we don't search from scratch.
+Using the same algorithm of sliding window search for each and every frame may seem to be quite unreasonable and inefficient. If we are working with a camera which provides around a real-time FPS, we can notice that between every consequtive frame, there is no such different in the lane lines, in terms of position or curvature. Accordingly, a [`fineFit()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L273) function is implemented under the same class, which searches for the lanes within a search margin based on the previous saved fit. The idea is that once we use the sliding windows to find the lines fit, the fit is saved. Then for the next frame, we don't search from scratch.
 ```python
 def fineFit(self, binary_warped, left_fit, right_fit):
     """
@@ -626,7 +626,7 @@ def sanity_check(self):
 
     return result
 ```
-Moreover, an average smoothing of the recent fits is done. This simply tries to prevents the line detections which jump around from frame to frame a bit. So the last 3 detections are averaged to achieve an average fit, and whenever a new successful detection is done, it replaces the very first detection from the 3 saved detections.
+Moreover, an average smoothing of the recent fits is done. This simply tries to prevent the line detections which jump around from frame to frame a bit. So the last 3 detections are averaged to achieve an average fit, and whenever a new successful detection is done, it replaces the very first detection from the 3 saved detections.
 ```python
 def average_fits(self, img_shape, line):
     n = 3
@@ -733,7 +733,7 @@ After we got the lanes, it is time now to do some nice calculations to retrieve 
     ```
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-The final step of the pipeline was to plot the polynomials on the warped image, fill the space between the polynomials to highlight the ego lane, use inverse perspective trasformation to unwarp the image from the birds-eye view back to its original perspective, and print the distance from center and radius of curvature on to the final annotated image.
+The final step of the pipeline was to plot the polynomials on the warped image, fill the space between the polynomials to highlight the ego lane, use inverse perspective trasformation to unwarp the image from the bird's-eye view back to its original perspective, and print the distance from center and radius of curvature on to the final annotated image.
 ![alt text][test_image_lanes]
 
 This is implemented in the [`visualize_lines()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L441) function as below:
@@ -814,7 +814,7 @@ And a last test was done on the harder challenge video as shown below, and here'
 
 1. <strong>Summary</strong>
 
-    Python3 with openCV functions were used to perform the camera calibration and do the undistortion of an image. Afterwards, focusing on a specific region and applying a perspective tranformation to retrieve a "bird's eye view" of the road. Then using Gradient and Color thresholding operations to detect lanes lines of the road by creating a Binary image where the points are lane areas.
+    Python3 with openCV functions were used to perform the camera calibration and do the undistortion of an image. Afterwards, focusing on a specific region and applying a perspective tranformation to retrieve a "bird's-eye view" of the road. Then using Gradient and Color thresholding operations to detect lanes lines of the road by creating a Binary image where the points are lane areas.
 
     To be able to detect the lanes, a slinding window search approach was implemented to search for the lane lines where the most binary activations are available in the image, and search around polynomial approach was implemented to search for lanes within a certain margin of a previously successful detection.
 
