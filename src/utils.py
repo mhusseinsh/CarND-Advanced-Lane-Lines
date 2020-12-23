@@ -27,7 +27,7 @@ def my_float(s):
 
 
 def save_image(img, file_name, path, path_extension):
-    results_path = path.replace(path.split("/")[-1], "results/" + path.split("/")[-1])
+    results_path = path.replace(path.split("/")[-1], "output_images/" + path.split("/")[-1])
     # Setup
     base_name = file_name.split("/")[-1].split(".")[0]
     extension = file_name.split("/")[-1].split(".")[1]

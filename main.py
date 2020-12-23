@@ -34,13 +34,14 @@ def main():
             # Video or Images
             videoMode = eval(configs["videoMode"])
             saveMode = eval(configs["saveMode"])
+            testImagesMode = eval(configs["testImagesMode"])
             if videoMode:
                 print("Processing Video")
                 input_video = configs["video"]
                 data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), input_video.split(".")[0])
                 # Init Pipeline
                 alf = AdvancedLaneFinding(calibrationPath, data_dir, chessboard, threshold, colorThreshold,
-                                          perspectiveTransform, laneFinding, videoMode, saveMode)
+                                          perspectiveTransform, laneFinding, videoMode, saveMode, testImagesMode)
                 clip1 = VideoFileClip(input_video)
                 project_clip = clip1.fl_image(alf.process)
                 project_clip.write_videofile(input_video.split(".")[0] + "_output." + input_video.split(".")[1], audio=False)
@@ -49,7 +50,7 @@ def main():
 
                 # Init Pipeline
                 alf = AdvancedLaneFinding(calibrationPath, test_images_dir, chessboard, threshold, colorThreshold,
-                                          perspectiveTransform, laneFinding, videoMode, saveMode)
+                                          perspectiveTransform, laneFinding, videoMode, saveMode, testImagesMode)
                 images = alf.getImageList()
                 # setup toolbar
                 print("Processing Images")

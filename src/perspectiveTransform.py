@@ -7,13 +7,15 @@ import matplotlib.image as mpimg
 
 
 class PerspectiveTransform:
-    def __init__(self, perspectiveTransform):
+    def __init__(self, perspectiveTransform, saveMode):
         # ul, ll, lr, ur
         src_offsets = perspectiveTransform["src"]
         self.ul_offset = [int(src_offsets["ul_offset"]["x"]), int(src_offsets["ul_offset"]["y"])]
         self.ll_offset = [int(src_offsets["ll_offset"]["x"]), int(src_offsets["ll_offset"]["y"])]
         self.lr_offset = [int(src_offsets["lr_offset"]["x"]), int(src_offsets["lr_offset"]["y"])]
         self.ur_offset = [int(src_offsets["ur_offset"]["x"]), int(src_offsets["ur_offset"]["y"])]
+
+        self.save_mode = saveMode
 
     def getCornerPoints(self, img_size):
         src = np.float32(
@@ -30,26 +32,28 @@ class PerspectiveTransform:
 
         return src, dst
 
-    def warp(self, img, file_name, data_dir):
+    def warp(self, img, file_name, data_dir, extension):
         img_size = img.shape[1], img.shape[0]
         src, dst = self.getCornerPoints(img_size)
         M = cv2.getPerspectiveTransform(src, dst)
         perpImage = cv2.warpPerspective(img, M, img_size, flags=cv2.INTER_LINEAR)
-        self.saveSideImages(img, perpImage, file_name, data_dir, src, dst)
+        if self.save_mode:
+            self.saveSideImages(img, perpImage, file_name, data_dir, src, dst, extension)
         return perpImage
 
-    def warpInv(self, img, file_name, data_dir):
+    def warpInv(self, img, file_name, data_dir, extension):
         img_size = img.shape[1], img.shape[0]
         src, dst = self.getCornerPoints(img_size)
         M = cv2.getPerspectiveTransform(dst, src)
         perpImage = cv2.warpPerspective(img, M, img_size, flags=cv2.INTER_LINEAR)
-        self.saveSideImages(perpImage, img, file_name, data_dir, src, dst)
+        if self.save_mode:
+            self.saveSideImages(perpImage, img, file_name, data_dir, src, dst, extension)
         return perpImage
 
-    def saveSideImages(self, img, perpImage, file_name, data_dir, src, dst):
+    def saveSideImages(self, img, perpImage, file_name, data_dir, src, dst, extension):
         f, ax = plt.subplots(1, 2, figsize=(14, 5))
         ax[0].imshow(img, cmap='gray')
-        ax[0].set_title('Thresholded Image with source points drawn')
+        ax[0].set_title('Image with source points drawn')
         ax[1].imshow(perpImage, cmap='gray')
         ax[1].set_title('Warped result with dest. points drawn')
         ax[0].axis('off')
@@ -62,5 +66,5 @@ class PerspectiveTransform:
         ax[1].plot(x_, y_, 'b--', lw=2)
         f.tight_layout()
         f.savefig("test.jpg")
-        save_image(mpimg.imread("test.jpg"), file_name, data_dir, "perpSide")
+        save_image(mpimg.imread("test.jpg"), file_name, data_dir, "perpSide" + extension)
         os.remove("test.jpg")

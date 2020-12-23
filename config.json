@@ -13,9 +13,10 @@
         }
     },
     "datapath": "test_images",
-    "video": "project_video.mp4",
-    "videoMode": "False",
-    "saveMode": "True",
+    "video": "harder_challenge_video.mp4",
+    "videoMode": "True",
+    "testImagesMode": "False",
+    "saveMode": "False",
     "perspectiveTransform": {
         "src": {
             "ul_offset": {
@@ -38,8 +39,8 @@
     },
     "threshold": {
         "dir_thresh": {
-            "high": "pi/2",
-            "low": "0"
+            "high": "1.3",
+            "low": "0.7"
         },
         "grad_thresh": {
             "high": "100",
