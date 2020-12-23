@@ -19,6 +19,19 @@ The goals / steps of this project are the following:
 * Warp the detected lane boundaries back onto the original image.
 * Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
+The project consists of multiple files:
+* [main.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/main.py): main project file which reads in the configurations file, initializes the advanced line finding class and start calling the process function by passing images
+* [config.json](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/config.json): configurations file
+* [advancedLaneFinding.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/advancedLaneFinding.py): contains the main process function and some class members which define the pipeline parameters
+* [cameraCalibration.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/cameraCalibration.py): contains the camera calibration class and functions
+* [undistortion.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/undistortion.py): contains the undistortion class and functions
+* [gradientThresh.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/gradientThresh.py): contains the gradient thresholding functions
+* [colorSpaces.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/colorSpaces.py): contains the color spaces thresholding functions
+* [perspectiveTransform.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/perspectiveTransform.py): contains the perspective transform class and functions
+* [laneFinding.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/laneFinding.py): contains all the lane finding methods and class
+* [line.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/line.py): contains the Line class with some class members
+* [utils.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/utils.py): contains some helper functions
+
 [//]: # (Image References)
 
 [image1]: ./examples/undistort_output.png "Undistorted"
@@ -89,7 +102,7 @@ As a first step, camera calibration is conducted. This used some chessboard imag
 <img src="./camera_cal/calibration6.jpg" width="200"/> <img src="./camera_cal/calibration7.jpg" width="200"/>  <img src="./camera_cal/calibration8.jpg" width="200"/> <img src="./camera_cal/calibration9.jpg" width="200"/> <img src="./camera_cal/calibration10.jpg" width="200"/>  <img src="./camera_cal/calibration11.jpg" width="200"/> <img src="./camera_cal/calibration12.jpg" width="200"/> <img src="./camera_cal/calibration13.jpg" width="200"/> 
 
 
-A [`class CameraCalibration`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/cameraCalibration.py#L11) which contains some class members and the [`calibrateCameraFromImages`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/cameraCalibration.py#L35) function is defined in [cameraCalibration.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/cameraCalibration.py).
+A [`class CameraCalibration`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/cameraCalibration.py#L11) which contains some class members and the [`calibrateCameraFromImages()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/cameraCalibration.py#L35) function is defined in [cameraCalibration.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/cameraCalibration.py).
 
 The calibration process starts by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image. 
 ```python
@@ -112,7 +125,7 @@ for idx, file_name in enumerate(images):
         imgpoints.append(corners)  # Draw and display the corners
         cv2.drawChessboardCorners(img, self.chessboardSize, corners, ret)
 ```
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the [`cv2.calibrateCamera()`](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga3207604e4b1a1758aa66acb6ed5aa65d) function.  I applied this distortion correction to the test image using the [`cv2.undistort()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/undistortion.py#L17) function, which will be explained later (just for debugging)
+I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the [`cv2.calibrateCamera()`](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga3207604e4b1a1758aa66acb6ed5aa65d) function.  I applied this distortion correction to the test image using the [`undistortChessboardImages()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/undistortion.py#L17) function, which will be explained later (just for debugging)
 ```python
 # Do camera calibration given object points and image points
 img_size = (img.shape[1], img.shape[0])
@@ -124,7 +137,7 @@ Chessboard | Detected Corners | Undistorted Chessboard
 :-:|:-:|:-:
 ![alt text][camera_cal_input] | ![alt text][camera_cal_corners] | ![alt text][camera_cal_undistorted]
 
-After obtaining the camera calibration coefficients, they are saved locally, so they can be called again using the [`calibrateCameraFromFile`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/cameraCalibration.py#L80) function, which saves time and effort for rerunning the calibration every time for any new test image.
+After obtaining the camera calibration coefficients, they are saved locally, so they can be called again using the [`calibrateCameraFromFile()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/cameraCalibration.py#L80) function, which saves time and effort for rerunning the calibration every time for any new test image.
 ```python
 def calibrateCameraFromFile(self, calibration_results):
     with open(calibration_results, "rb") as f:
@@ -136,7 +149,7 @@ def calibrateCameraFromFile(self, calibration_results):
 
 #### 1. Provide an example of a distortion-corrected image.
 
-The complete pipeline begins by running the calibration once (if the calibration parameters are not found locally), then getting the coefficients, and start running on a single input image. The image is first undistorted using the [`undistort`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/undistortion.py#L13) which is defined in the [`class Undistortion`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/undistortion.py#L8) in [undistortion.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/undistortion.py#L8). Inside this function, the camera calibration matrix and distortion coefficients are passed to the [`cv2.undistort()`](https://docs.opencv.org/3.4/da/d54/group__imgproc__transform.html#ga69f2545a8b62a6b0fc2ee060dc30559d) along with the input distorted image.
+The complete pipeline begins by running the calibration once (if the calibration parameters are not found locally), then getting the coefficients, and start running on a single input image. The image is first undistorted using the [`undistort()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/undistortion.py#L13) function which is defined in the [`class Undistortion`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/undistortion.py#L8) in [undistortion.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/undistortion.py#L8). Inside this function, the camera calibration matrix and distortion coefficients are passed to the [`cv2.undistort()`](https://docs.opencv.org/3.4/da/d54/group__imgproc__transform.html#ga69f2545a8b62a6b0fc2ee060dc30559d) along with the input distorted image.
 ```python
 def undistort(self, data_dir, file_name, img):
     undistorted_img = cv2.undistort(img, self.mtx, self.dist)
@@ -277,14 +290,14 @@ The thresholding functions are defined in [gradientThresh.py](https://github.com
 
     It is clearly obvious that the s-channel outperforms in both HLS and HSV spaces as it shows the lines very well.
     
-* Combined Binary Image
+* <strong>Combined Binary Image</strong>
   
   The color and gradient thresholds are combined to be able to achieve the best both worlds.
   ![alt text][test_image_combined]
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-A perspective transform maps the points in a given image to different, desired, image points with a new perspective. In this case, we are interested in the bird’s-eye view transform, which allows us to view the lane from above, making it easier to later calculate the lane curvature and so on. A [`class PerspectiveTransform`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/perspectiveTransform.py#L9) is defined in [perspectiveTransform.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/tree/master/src) which contains some class members from predefined corner offsets that are written in a configurations file for the `src` and `dst` corner points.
+A perspective transform maps the points in a given image to different, desired, image points with a new perspective. In this case, we are interested in the bird’s-eye view transform, which allows us to view the lane from above, making it easier to later calculate the lane curvature and so on. A [`class PerspectiveTransform`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/perspectiveTransform.py#L9) is defined in [perspectiveTransform.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/perspectiveTransform.py) which contains some class members from predefined corner offsets that are written in a configurations file for the `src` and `dst` corner points.
 ```python
 def __init__(self, perspectiveTransform):
     # ul, ll, lr, ur
@@ -317,7 +330,7 @@ This resulted in the following source and destination points:
 | 1190, 720     | 720, 720      |
 | 700, 440      | 720, 0        |
 
-The `class` includes a [`warp`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/perspectiveTransform.py#L33) and [`warpInv`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/perspectiveTransform.py#L41) functions which call inside the [`cv2.getPerspectiveTransform()`](https://docs.opencv.org/master/da/d54/group__imgproc__transform.html#ga20f62aa3235d869c9956436c870893ae) and [`cv2.warpPerspective()`](https://docs.opencv.org/master/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87) respectively to get the transformation matrix `M` between two arrays then apply it on an input image to get the transformed one.
+The `class` includes a [`warp()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/perspectiveTransform.py#L33) and [`warpInv()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/perspectiveTransform.py#L41) functions which call inside the [`cv2.getPerspectiveTransform()`](https://docs.opencv.org/master/da/d54/group__imgproc__transform.html#ga20f62aa3235d869c9956436c870893ae) and [`cv2.warpPerspective()`](https://docs.opencv.org/master/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87) respectively to get the transformation matrix `M` between two arrays then apply it on an input image to get the transformed one.
 ```python
 def warp(self, img, file_name, data_dir):
     img_size = img.shape[1], img.shape[0]
@@ -374,7 +387,7 @@ From this step, a sliding window search algorithm is implemented. The idea is to
 After getting all the pixels belonging the left and right lanes, we fit a polynomial through these pixels to find the left and right fit using the [`np.polyfit()`](https://numpy.org/doc/stable/reference/generated/numpy.polyfit.html) function.
 ![alt text][test_image_windows_fit]
 
-This is implemented in the [`lineFit`]() function which is a method of the complete [`class LaneFinding`]() implemented in [laneFinding.py]()
+This is implemented in the [`lineFit`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L146) function which is a method of the complete [`class LaneFinding`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L9) implemented in [laneFinding.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/laneFinding.py)
 ```python
 def lineFit(self, binary_warped):
     """
@@ -503,7 +516,7 @@ def lineFit(self, binary_warped):
 
     return left_fit, right_fit, out_img, histogram_img, window_fit_img
 ```
-Using the same algorithm of sliding window search for each and every frame may seem to be quite inreasonable and inefficient. If we are working with a camera which provides around a real-time FPS, we can notice that between every consequtive frame, there is no such different in the lane lines, in terms of position or curvature. Accordingly, a [`fineFit`]() function is implemented under the same class, which searches for the lanes within a search margin based on the previous saved fit. The idea is that once we use the sliding windows to find the lines fit, the fit is saved. Then for the next frame, we don't search from scratch.
+Using the same algorithm of sliding window search for each and every frame may seem to be quite inreasonable and inefficient. If we are working with a camera which provides around a real-time FPS, we can notice that between every consequtive frame, there is no such different in the lane lines, in terms of position or curvature. Accordingly, a [`fineFit()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L273) function is implemented under the same class, which searches for the lanes within a search margin based on the previous saved fit. The idea is that once we use the sliding windows to find the lines fit, the fit is saved. Then for the next frame, we don't search from scratch.
 ```python
 def fineFit(self, binary_warped, left_fit, right_fit):
     """
@@ -583,7 +596,7 @@ Line Fit (Sliding Window) | Fine Fit (Search around Poly)
 :-:|:-:
 ![alt text][test_image_windows] | ![alt text][test_image_windows_2]
 
-After every algorithm run, a sanity check is done. Inside the [`sanity_check`](), the lines are checked against each other if they do have more or less a similar curvature, if they have more or less the same width in top, middle and bottom positions and if they are roughly parallel. If the sanity check fails, then this is considered to be an invalid fit, and accordingly, the fit is cleared and the line is saved as undetected. This will help that the next frame will do a blind search from scratch instead of depending on the previous detected fit. In this case, a complete reset is done.
+After every algorithm run, a sanity check is done. Inside the [`sanity_check()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L355), the lines are checked against each other if they do have more or less a similar curvature, if they have more or less the same width in top, middle and bottom positions and if they are roughly parallel. If the sanity check fails, then this is considered to be an invalid fit, and accordingly, the fit is cleared and the line is saved as undetected. This will help that the next frame will do a blind search from scratch instead of depending on the previous detected fit. In this case, a complete reset is done.
 ```python
 def sanity_check(self):
     # Calculate widths at top and bottom
@@ -638,7 +651,7 @@ def average_fits(self, img_shape, line):
 
     return average_fit
 ```
-In order to easily achieve all the above work, a [`class Line`]() is defined in [line.py]() which stores all the information about a certain line that can be easily recalled and modified.
+In order to easily achieve all the above work, a [`class Line`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/line.py#L5) is defined in [line.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/line.py) which stores all the information about a certain line that can be easily recalled and modified.
 ```python
 class Line:
     def __init__(self):
@@ -673,13 +686,14 @@ After we got the lanes, it is time now to do some nice calculations to retrieve 
 
 * <strong>Radius of Curvature</strong>
     
-    To get the formula of calculating the radius of a curvature, this [reference](https://www.intmath.com/applications-differentiation/8-radius-curvature.php) was used. For calculating a radius of curvature in real world, the U.S. regulations were used. It is required that a lane should have a minimum width of 3.7 meters, and it is assumed the lane's length is about 30m. Therefore, to convert from pixels to real-world meter measurements, we can use:
+    To get the formula of calculating the radius of a curvature, this [reference](https://www.intmath.com/applications-differentiation/8-radius-curvature.php) was used. The radius of curvature for a second order polynomial equation `f(y)=A*y^2+B*y+C` is calculated using the following equation: `curvature=((1+(2*A*y+B)^2)^3/2)/abs(2*A)`.
+    For calculating a radius of curvature in real world, the U.S. regulations were used. It is required that a lane should have a minimum width of 3.7 meters, and it is assumed the lane's length is about 30m. Therefore, to convert from pixels to real-world meter measurements, we can use:
     ```python
     # Define conversions in x and y from pixels space to meters
     ym_per_pix = 30/720 # meters per pixel in y dimension
     xm_per_pix = 3.7/700 # meters per pixel in x dimension
     ```
-    Accordingly, the radius of curvature is implemented in the [`calc_curvature()`]() function as below:
+    Accordingly, the radius of curvature is implemented in the [`calc_curvature()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L481) function as below:
     ```python
     def calc_curvature(self, img_shape, fit):
         # Generate y values for plotting
@@ -702,7 +716,7 @@ After we got the lanes, it is time now to do some nice calculations to retrieve 
     ```
 * <strong>Vehicle Deviation from Center</strong>
 
-    The deviation of the driving vehicle from the center is easily achieved via getting the center position of the image and the center of the detected lane then comparing them together. This is implemented in the [`vehicle_position()`]() function as below:
+    The deviation of the driving vehicle from the center is easily achieved via getting the center position of the image and the center of the detected lane then comparing them together. This is implemented in the [`vehicle_position()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L500) function as below:
     ```python
     def vehicle_position(self, img_shape, left_lane_pos, right_lane_pos):
         # Calculate position based on midpoint - center of lanes distance
@@ -722,7 +736,7 @@ After we got the lanes, it is time now to do some nice calculations to retrieve 
 The final step of the pipeline was to plot the polynomials on the warped image, fill the space between the polynomials to highlight the ego lane, use inverse perspective trasformation to unwarp the image from the birds-eye view back to its original perspective, and print the distance from center and radius of curvature on to the final annotated image.
 ![alt text][test_image_lanes]
 
-This is implemented in the [`visualize_lines()`]() function as below:
+This is implemented in the [`visualize_lines()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L441) function as below:
 ```python
 def visualize_lines(self, warped, undist, left_fit, right_fit, curvature, position, persp_transform, file_name,
                     data_dir):
@@ -771,11 +785,11 @@ def visualize_lines(self, warped, undist, left_fit, right_fit, curvature, positi
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 After establishing a pipeline to process standalone test images, the final step was to make this pipeline to process videos frame-by-frame, to see the performace of camera input stream mounted on a real vehicle.
 
-My goal was not to create a different pipeline or method for video processing that will be much different from image processing. So I tried to stick to using the exact same methods exactly, but just using some flags to differentiate between if it is a video or single images. The [`class Line`]() helped a lot in this process as I mentioned above. I was simply saving all the related line information in terms of previous or current detections, as well as all lane features, which can be used to smooth my detections across all frames.
+My goal was not to create a different pipeline or method for video processing that will be much different from image processing. So I tried to stick to using the exact same methods exactly, but just using some flags to differentiate between if it is a video or single images. The [`class Line`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L9) helped a lot in this process as I mentioned above. I was simply saving all the related line information in terms of previous or current detections, as well as all lane features, which can be used to smooth my detections across all frames.
 
-The check of whether to use the [`lineFit`]() or [`fineFit`]() as explained above was implemented, so the pipeline does not need to scan the whole entire frame once again if there is already a detected line in the previous frame, nevertheless, it searches through a margin around the previous detected line for the location of the new line. 
+The check of whether to use the [`lineFit()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L146) or [`fineFit()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L273) as explained above was implemented, so the pipeline does not need to scan the whole entire frame once again if there is already a detected line in the previous frame, nevertheless, it searches through a margin around the previous detected line for the location of the new line. 
 
-If for any reason, the [`fineFit`]() fails to get new lane pixels, the pipeline shifts automatically to [`lineFit`]() to do a blind search via the sliding window approach.
+If for any reason, the [`fineFit()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L273) fails to get new lane pixels, the pipeline shifts automatically to [`lineFit()`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/f7f2914849067933ee1b93edceaf854856ba3d07/src/laneFinding.py#L146) to do a blind search via the sliding window approach.
 
 The output of the project video is shown below, and here's a [link to the video result](./output_videos/project_video_output.mp4):
 |Project Video|Project Video - Debug|
@@ -806,7 +820,7 @@ And a last test was done on the harder challenge video as shown below, and here'
 
     As a final step, the detected lanes are drawn back on to the undistorted image, by applying an inverse persepective transform to get the unwarped image then drawing the lanes and their filling on the image.
 
-    A configuration json file is provided where all the thresholding parameters are stored there, as well as the calibration images directory, test_images directory and the name of the video to be executed. This makes it easier for the user to just do the changes in the json file without the need to touch the code at all.
+    A configuration json file [config.json](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/config.json) is provided where all the thresholding parameters are stored there, as well as the calibration images directory, test_images directory and the name of the video to be executed. This makes it easier for the user to just do the changes in the json file without the need to touch the code at all.
 
     ```json
     {
@@ -881,6 +895,21 @@ And a last test was done on the harder challenge video as shown below, and here'
 
 2. <strong>Problems/Issues</strong>
    
-   As shown from the results above, the pipeline which was developed performs really well on the test images and the project video with a fairly robust performance. This is due to the fact that the roads in basically ideal conditions, with fairly distinct lane lines, and on a clear day.
+   As shown from the results above, the pipeline which was developed performs really well on the test images and the project video with a fairly robust performance. This is due to the fact that the roads in basically ideal conditions, with fairly distinct lane lines (straight/slightly curved), and on a clear day.
+
+
+   The problems I encountered for the other videos were almost exclusively due to lighting conditions, shadows, discoloration, etc. My pipeline mostly failed in harsher environments. The frames in the two other videos were very difficult and tricky for the pipeline to well perform.
    
-   The problems I encountered for the other videos were almost exclusively due to lighting conditions, shadows, discoloration, etc.
+   For the challenge video, we can see from the results that the pipeline struggled a little due to road added features like the concrete separator which the car was driving close to. This projects a shadow in the lane and parallel to the lines. It is noticed that the near area close to the vehicle works well, but on far areas, the detection is not so good. However, I do believe, that with some modifications, we can overcome such problems.
+
+   For the harder challenging video, it is obvious that the pipeline did not work well. This is due to the rapid changes in road curvature, lightning conditions, visibility of shadows, and steeper bends which makes it difficult for the pipeline to perform in such conditions.
+
+   Another problem was exploring the hyperparameters from the threshold limits of gradients and colors as well as source points for the perspective transform. They needed a lot of testing and manual checks to find the most convenient ones.
+
+2. <strong>Suggestions/Imrpovements</strong>
+
+    * Advanced deep learning approaches could be implemented to segment the lane lines that classical openCV techniques.
+    * Sanity checks could be made more robust to work on curvy roads like in the harder challenge video.
+    * Exploring more thresholds might be worth.
+    * Extracting information about different line colors (white and yellow) and including them in the pipeline might be helpful.
+    * 
