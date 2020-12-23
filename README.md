@@ -1,6 +1,7 @@
 ## Report
 ---
 ![alt text][project_video]
+
 **Advanced Lane Finding Project**
 
 Lane finding is an important task for an autonomous vehicle to be able to how much exactly is it away from a certain lane. Finding the ego lane as well and making sure that the car is sticking to it is very crucial for self-driving vehicles. Lane detection may be tricky sometimes, especially in the case of changing of light/brightness or different lane colors as well as some road markings may be disappearing. Previously, a [basic lane finding algorithm](https://github.com/mhusseinsh/CarND-LaneLines-P1) using classic approaches of basic [openCV](https://opencv.org/) functions was implemented, and it was very obvious from the results, that it cannot be used for generic cases. The fact is due that it failed in curvy lanes, and different lane colors.
@@ -180,6 +181,7 @@ The thresholding functions are defined in [gradientThresh.py](https://github.com
     gradx | grady
     :-:|:-:
     ![alt text][test_image_gradx] | ![alt text][test_image_grady]
+
 * <strong>Gradient Magnitude</strong>
     
     The magnitude of the gradient is calculated using the below function.
@@ -206,6 +208,7 @@ The thresholding functions are defined in [gradientThresh.py](https://github.com
     ```
     This produces the below binary image
     ![alt text][test_image_mag_binary]
+
 * <strong>Gradient Direction</strong>
     
     The direction of the gradient is calculated using the below function.
@@ -232,6 +235,7 @@ The thresholding functions are defined in [gradientThresh.py](https://github.com
     ```
     This produces the below binary image
     ![alt text][test_image_dir_binary]
+
 * <strong>Color Channel - HLS and HSV Spaces</strong>
     
     The color channel thresholds are calculated using the below function.
@@ -277,6 +281,7 @@ The thresholding functions are defined in [gradientThresh.py](https://github.com
   
   The color and gradient thresholds are combined to be able to achieve the best both worlds.
   ![alt text][test_image_combined]
+
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
 A perspective transform maps the points in a given image to different, desired, image points with a new perspective. In this case, we are interested in the bird’s-eye view transform, which allows us to view the lane from above, making it easier to later calculate the lane curvature and so on. A [`class PerspectiveTransform`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/perspectiveTransform.py#L9) is defined in [perspectiveTransform.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/tree/master/src) which contains some class members from predefined corner offsets that are written in a configurations file for the `src` and `dst` corner points.
@@ -365,6 +370,7 @@ With this histogram above, the pixel values along each column in the image are a
 
 From this step, a sliding window search algorithm is implemented. The idea is to simply create windows along the height of the image (for both left and right lines) and start moving these windows upward in the image (further along the road) to determine where the lane lines go. The windows should keep iterating across the binary activations in the image to track curvature with sliding left or right if it finds the mean position of activated pixels within the window to have shifted.
 ![alt text][test_image_windows]
+
 After getting all the pixels belonging the left and right lanes, we fit a polynomial through these pixels to find the left and right fit using the [`np.polyfit()`](https://numpy.org/doc/stable/reference/generated/numpy.polyfit.html) function.
 ![alt text][test_image_windows_fit]
 
@@ -715,6 +721,7 @@ After we got the lanes, it is time now to do some nice calculations to retrieve 
 
 The final step of the pipeline was to plot the polynomials on the warped image, fill the space between the polynomials to highlight the ego lane, use inverse perspective trasformation to unwarp the image from the birds-eye view back to its original perspective, and print the distance from center and radius of curvature on to the final annotated image.
 ![alt text][test_image_lanes]
+
 This is implemented in the [`visualize_lines()`]() function as below:
 ```python
 def visualize_lines(self, warped, undist, left_fit, right_fit, curvature, position, persp_transform, file_name,
