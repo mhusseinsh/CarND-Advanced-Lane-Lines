@@ -781,10 +781,12 @@ The output of the project video is shown below, and here's a [link to the video 
 |Project Video|Project Video - Debug|
 |-------------|-------------|
 |![Project Video][project_video]|![Project Video - Debug][project_video_debug]
+
 Another test was done on the challenge video as shown below, and here's a [link to the video result](./output_videos/challenge_video_output.mp4):
 |Challenge Video|Challenge Video - Debug|
 |-------------|-------------|
 |![Challenge Video][challenge_video]|![Challenge Video - Debug][challenge_video_debug]
+
 And a last test was done on the harder challenge video as shown below, and here's a [link to the video result](./output_videos/harder_challenge_video_output.mp4):
 |Harder Challenge Video|Harder Challenge Video - Debug|
 |-------------|-------------|
@@ -796,7 +798,7 @@ And a last test was done on the harder challenge video as shown below, and here'
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-1. Summary
+1. <strong>Summary</strong>
 
     Python3 with openCV functions were used to perform the camera calibration and do the undistortion of an image. Afterwards, focusing on a specific region and applying a perspective tranformation to retrieve a "bird's eye view" of the road. Then using Gradient and Color thresholding operations to detect lanes lines of the road by creating a Binary image where the points are lane areas.
 
@@ -877,7 +879,7 @@ And a last test was done on the harder challenge video as shown below, and here'
     python3 main.py config.json
     ```
 
-2. Problems/Issues
+2. <strong>Problems/Issues</strong>
    
    As shown from the results above, the pipeline which was developed performs really well on the test images and the project video with a fairly robust performance. This is due to the fact that the roads in basically ideal conditions, with fairly distinct lane lines, and on a clear day.
    
