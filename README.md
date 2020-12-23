@@ -1,6 +1,6 @@
 ## Report
 ---
-
+![alt text][project_video]
 **Advanced Lane Finding Project**
 
 Lane finding is an important task for an autonomous vehicle to be able to how much exactly is it away from a certain lane. Finding the ego lane as well and making sure that the car is sticking to it is very crucial for self-driving vehicles. Lane detection may be tricky sometimes, especially in the case of changing of light/brightness or different lane colors as well as some road markings may be disappearing. Previously, a [basic lane finding algorithm](https://github.com/mhusseinsh/CarND-LaneLines-P1) using classic approaches of basic [openCV](https://opencv.org/) functions was implemented, and it was very obvious from the results, that it cannot be used for generic cases. The fact is due that it failed in curvy lanes, and different lane colors.
@@ -85,7 +85,7 @@ Camera calibration is the process of finding the true parameters of the camera m
 
 As a first step, camera calibration is conducted. This used some chessboard images of size <strong>(9*6)</strong> that were provided [here](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/tree/master/camera_cal). Below are some examples of the chessboard images:
 
-<img src="./camera_cal/calibration6.jpg" width="200"/> <img src="./camera_cal/calibration7.jpg" width="200"/>  <img src="./camera_cal/calibration8.jpg" width="200"/> <img src="./camera_cal/calibration9.jpg" width="200"/> <img src="./camera_cal/calibration10.jpg" width="200"/>  <img src="./camera_cal/calibration11.jpg" width="200"/> 
+<img src="./camera_cal/calibration6.jpg" width="200"/> <img src="./camera_cal/calibration7.jpg" width="200"/>  <img src="./camera_cal/calibration8.jpg" width="200"/> <img src="./camera_cal/calibration9.jpg" width="200"/> <img src="./camera_cal/calibration10.jpg" width="200"/>  <img src="./camera_cal/calibration11.jpg" width="200"/> <img src="./camera_cal/calibration12.jpg" width="200"/> <img src="./camera_cal/calibration13.jpg" width="200"/> 
 
 
 A [`class CameraCalibration`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/cameraCalibration.py#L11) which contains some class members and the [`calibrateCameraFromImages`](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/d1a0097700b232b67bba15b278791e643ab9ec9a/src/cameraCalibration.py#L35) function is defined in [cameraCalibration.py](https://github.com/mhusseinsh/CarND-Advanced-Lane-Lines/blob/master/src/cameraCalibration.py).
@@ -265,10 +265,12 @@ The thresholding functions are defined in [gradientThresh.py](https://github.com
     h-channel | l-channel | s-channel
     :-:|:-:|:-:
     ![alt text][test_image_h_binary] | ![alt text][test_image_l_binary] | ![alt text][test_image_s_binary]
+
     And the below binary images in HSV Space
     h-channel | s-channel | v-channel
     :-:|:-:|:-:
     ![alt text][test_image__h_binary] | ![alt text][test_image__s_binary] | ![alt text][test_image__v_binary]
+
     It is clearly obvious that the s-channel outperforms in both HLS and HSV spaces as it shows the lines very well.
     
 * Combined Binary Image
@@ -335,6 +337,7 @@ Input Image | Warped Image
 Thresholded Image | Warped Thresholded Image
 :-:|:-:
 ![alt text][test_image_combined] | ![alt text][test_image_perspective]
+
 The perspective transform was verified by drawing the `src` and `dst` points on test images and their transformations to verify that the straight lines appear parallel in the warped image and also showing that the curved lines are (more or less) parallel in the transformed image.
 
 
@@ -349,6 +352,7 @@ After applying calibration, thresholding, and a perspective transform to a road 
 Input Image | Warped Thresholded Image
 :-:|:-:
 ![alt text][test_image_undistorted] | ![alt text][test_image_perspective]
+
 Plotting a histogram of where the binary activations occur across the image could be a first step to do.
 ```python
 # Take a histogram of the bottom half of the image
@@ -356,12 +360,14 @@ bottom_half = binary_warped[binary_warped.shape[0] // 2:, :]
 histogram = np.sum(bottom_half, axis=0)
 ```
 ![alt text][test_image_histogram]
+
 With this histogram above, the pixel values along each column in the image are added up. If we check back the thresholded binary image, we have pixels only containing 0 or 1, so the two most prominent peaks in this histogram show the x-position of the base of the lane lines. From this base, a lane search algorithm can be imlemented.
 
 From this step, a sliding window search algorithm is implemented. The idea is to simply create windows along the height of the image (for both left and right lines) and start moving these windows upward in the image (further along the road) to determine where the lane lines go. The windows should keep iterating across the binary activations in the image to track curvature with sliding left or right if it finds the mean position of activated pixels within the window to have shifted.
 ![alt text][test_image_windows]
 After getting all the pixels belonging the left and right lanes, we fit a polynomial through these pixels to find the left and right fit using the [`np.polyfit()`](https://numpy.org/doc/stable/reference/generated/numpy.polyfit.html) function.
 ![alt text][test_image_windows_fit]
+
 This is implemented in the [`lineFit`]() function which is a method of the complete [`class LaneFinding`]() implemented in [laneFinding.py]()
 ```python
 def lineFit(self, binary_warped):
@@ -570,6 +576,7 @@ def fineFit(self, binary_warped, left_fit, right_fit):
 Line Fit (Sliding Window) | Fine Fit (Search around Poly)
 :-:|:-:
 ![alt text][test_image_windows] | ![alt text][test_image_windows_2]
+
 After every algorithm run, a sanity check is done. Inside the [`sanity_check`](), the lines are checked against each other if they do have more or less a similar curvature, if they have more or less the same width in top, middle and bottom positions and if they are roughly parallel. If the sanity check fails, then this is considered to be an invalid fit, and accordingly, the fit is cleared and the line is saved as undetected. This will help that the next frame will do a blind search from scratch instead of depending on the previous detected fit. In this case, a complete reset is done.
 ```python
 def sanity_check(self):
@@ -791,7 +798,7 @@ And a last test was done on the harder challenge video as shown below, and here'
     As a final step, the detected lanes are drawn back on to the undistorted image, by applying an inverse persepective transform to get the unwarped image then drawing the lanes and their filling on the image.
 
     A configuration json file is provided where all the thresholding parameters are stored there, as well as the calibration images directory, test_images directory and the name of the video to be executed. This makes it easier for the user to just do the changes in the json file without the need to touch the code at all.
-    
+
     ```json
     {
         "calibrationPath": "camera_cal",
