@@ -912,4 +912,3 @@ And a last test was done on the harder challenge video as shown below, and here'
     * Sanity checks could be made more robust to work on curvy roads like in the harder challenge video.
     * Exploring more thresholds might be worth.
     * Extracting information about different line colors (white and yellow) and including them in the pipeline might be helpful.
-    * 
