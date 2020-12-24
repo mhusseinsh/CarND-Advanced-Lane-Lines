@@ -21,8 +21,7 @@ class LaneFinding:
         self.test_images_mode = testImagesMode
 
     def findLines(self, img, binary_warped, pers_transform, file_name, data_dir):
-        # detect the X and Y positions of all relevant lane pixels - depending on
-        # history of detected lanes
+        # check if a previous fit is detected
         if (self.left_line.detected is False) or (self.right_line.detected is False):
             try:
                 print(file_name, "Line Fit")
@@ -234,13 +233,6 @@ class LaneFinding:
 
         # Fit polynomial based on pixels found
         left_fit, right_fit = self.fit_poly(leftx, lefty, rightx, righty)
-        # Output values
-        #left_fit_text = "left: %.6f %.6f %.6f" % (left_fit[0], left_fit[1], left_fit[2])
-        #right_fit_text = "right: %.6f %.6f %.6f" % (right_fit[0], right_fit[1], right_fit[2])
-
-        # Add text to image
-        #cv2.putText(out_img, left_fit_text, (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), thickness=2)
-        #cv2.putText(out_img, right_fit_text, (30, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), thickness=2)
 
         # Draw Histogram
         fig = Figure()
@@ -334,14 +326,6 @@ class LaneFinding:
         cv2.fillPoly(window_img, np.int_([right_line_pts]), (0, 255, 0))
         out_img = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
 
-        # Output values
-        #left_fit_text = "left: %.6f %.6f %.6f" % (left_fit[0], left_fit[1], left_fit[2])
-        #right_fit_text = "right: %.6f %.6f %.6f" % (right_fit[0], right_fit[1], right_fit[2])
-
-        # Add text to image
-        #cv2.putText(out_img, left_fit_text, (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), thickness=2)
-        #cv2.putText(out_img, right_fit_text, (30, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), thickness=2)
-
         return left_fit, right_fit, out_img
 
     def fit_poly(self, leftx, lefty, rightx, righty):
@@ -384,15 +368,15 @@ class LaneFinding:
         n = 3
         average_fit = [0, 0, 0]
 
-        # If we do not have enough fits, append the list with the current fit
+        # Append the previous fits in case of there are no fits stored
         if len(line.previous_fits) < n:
             line.previous_fits.append(line.current_fit)
-        # If amount of fits == n, remove the last element and add the current one
+        # If list is full, replace the first fit with the current one
         if len(line.previous_fits) == n:
             line.previous_fits.pop(n - 1)
             line.previous_fits.insert(0, line.current_fit)
 
-        # If we have enough fits, calculate the average
+        # Average fit
         if len(line.previous_fits) > 0:
             for i in range(0, 3):
                 total = 0
@@ -412,12 +396,12 @@ class LaneFinding:
 
         if len(self.lane.previous_bottom_widths) < n:
             self.lane.previous_bottom_widths.append(self.lane.bottom_width)
-        # If amount of fits == n, remove the last element and add the current one
+        # If list is full, replace the first fit with the current one
         if len(self.lane.previous_bottom_widths) == n:
             self.lane.previous_bottom_widths.pop(n - 1)
             self.lane.previous_bottom_widths.insert(0, self.lane.bottom_width)
 
-        # If we have enough fits, calculate the average
+        # Average width
         if (len(self.lane.previous_bottom_widths) > 0):
             for i in range(0, len(self.lane.previous_bottom_widths)):
                 sum_bottom = sum_bottom + self.lane.previous_bottom_widths[i]
@@ -425,12 +409,12 @@ class LaneFinding:
 
         if len(self.lane.previous_top_widths) < n:
             self.lane.previous_top_widths.append(self.lane.top_width)
-        # If amount of fits == n, remove the last element and add the current one
+        # If list is full, replace the first fit with the current one
         if len(self.lane.previous_top_widths) == n:
             self.lane.previous_top_widths.pop(n - 1)
             self.lane.previous_top_widths.insert(0, self.lane.top_width)
 
-        # If we have enough fits, calculate the average
+        # Average width
         if len(self.lane.previous_top_widths) > 0:
             for i in range(0, len(self.lane.previous_top_widths)):
                 sum_top = sum_top + self.lane.previous_top_widths[i]
